@@ -1,8 +1,8 @@
 import express, { Express } from "express";
 import ErrorHandler from "./middlewares/errorHandler";
-import 'dotenv/config';
 import { main } from "./services/service.database";
-
+import configureRoutes from "./routes";
+import 'dotenv/config';
 
 
 class App {
@@ -13,6 +13,10 @@ class App {
     this.app = express();
     this.initializeMiddlewares();
     this.initializeErrorHandling();
+    this.app.get('/', (req, res) => {
+      res.send('LangGraph Agent Server');
+    });
+    configureRoutes(this.app);
   }
 
   public initializeMiddlewares() {
@@ -21,7 +25,8 @@ class App {
   }
 
   public initializeErrorHandling() {
-    this.app.use(new ErrorHandler().errorHandler);
+    const handleError = new ErrorHandler();
+    this.app.use(handleError.errorHandler);
   }
 
   public static getInstance() {
@@ -32,11 +37,11 @@ class App {
   }
 
   public listen() {
-    this.app.listen(process.env.PORT,  async () => {
+    this.app.listen(process.env.PORT, async () => {
+      console.log(`Server running on http://localhost:5000`);
       await main();
-      console.log(`Server running on http://localhost:${process.env.PORT}`);
     });
   }
 }
 
-export default App.getInstance();
+export default App;
